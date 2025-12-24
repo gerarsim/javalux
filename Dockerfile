@@ -1,29 +1,30 @@
-# Multi-stage Docker build for Java + React application
+# Full Multi-stage Docker build for Java + React application
 # Compliance-ready for Luxembourg deployment
 
 # Stage 1: Build React frontend
 FROM node:18-alpine AS frontend-build
-WORKDIR /app/frontend
+WORKDIR /app
 
-# Copy package files
-COPY frontend/package*.json ./
-RUN npm ci --only=production
+# Copy package files from your React app directory
+COPY package*.json ./
+RUN npm ci
 
 # Copy frontend source and build
-COPY frontend/ ./
+COPY public/ ./public/
+COPY src/ ./src/
 RUN npm run build
 
 # Stage 2: Build Java backend
 FROM maven:3.9-eclipse-temurin-17 AS backend-build
-WORKDIR /app/backend
+WORKDIR /app
 
 # Copy Maven files
-COPY backend/pom.xml ./
-RUN mvn dependency:go-offline
+COPY pom.xml ./
+RUN mvn dependency:go-offline -B
 
 # Copy source and build
-COPY backend/src ./src
-RUN mvn clean package -DskipTests
+COPY src/ ./src/
+RUN mvn clean package -DskipTests -B
 
 # Stage 3: Production image
 FROM eclipse-temurin:17-jre-alpine
@@ -34,8 +35,8 @@ RUN addgroup -g 1001 -S appgroup && \
     adduser -u 1001 -S appuser -G appgroup
 
 # Copy built artifacts
-COPY --from=backend-build /app/backend/target/*.jar app.jar
-COPY --from=frontend-build /app/frontend/build ./static
+COPY --from=backend-build /app/target/*.jar app.jar
+COPY --from=frontend-build /app/build ./static
 
 # Set up logging directory for audit trails (Luxembourg GDPR compliance)
 RUN mkdir -p /app/logs && \
