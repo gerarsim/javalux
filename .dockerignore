@@ -6,7 +6,6 @@
 .gitattributes
 
 # Environment files (security)
-.env
 .env.local
 .env.*.local
 *.key
@@ -58,5 +57,3 @@ temp/
 # Docker
 docker-compose.override.yml
 .dockerignore
-Dockerfile*
-.terraform
