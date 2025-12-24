@@ -1,0 +1,236 @@
+# Spring Boot Application Configuration
+# Luxembourg Compliance Settings
+
+spring:
+  application:
+    name: compliance-app
+  
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:production}
+  
+  # Database Configuration
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: false
+        jdbc:
+          time_zone: Europe/Luxembourg
+  
+  # Security Configuration
+  security:
+    oauth2:
+      client:
+        registration:
+          # Configure OAuth2 providers if needed
+  
+  # Session Management (GDPR Compliance)
+  session:
+    store-type: jdbc
+    timeout: ${SESSION_TIMEOUT:1800}s
+    jdbc:
+      initialize-schema: always
+      table-name: SPRING_SESSION
+  
+  # File Upload Configuration
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB
+      enabled: true
+
+# Server Configuration
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+  compression:
+    enabled: true
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        secure: true
+        same-site: strict
+        max-age: 1800
+
+# Management & Monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  health:
+    db:
+      enabled: true
+    diskspace:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Logging Configuration (Audit Trail)
+logging:
+  level:
+    root: ${LOGGING_LEVEL_ROOT:INFO}
+    org.springframework.web: INFO
+    org.springframework.security: DEBUG
+    org.hibernate: WARN
+    com.yourcompany.compliance: ${LOGGING_LEVEL_APP:DEBUG}
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: /app/logs/application.log
+    max-size: 10MB
+    max-history: 90
+    total-size-cap: 1GB
+
+# Application-specific Configuration
+app:
+  # Luxembourg Compliance Settings
+  compliance:
+    luxembourg:
+      enabled: true
+      timezone: Europe/Luxembourg
+      cnpd:
+        registration-number: ${CNPD_REGISTRATION_NUMBER:}
+        data-protection-officer-email: ${DATA_PROTECTION_OFFICER_EMAIL:}
+      cssf:
+        enabled: ${CSSF_REPORTING_ENABLED:false}
+        entity-id: ${CSSF_ENTITY_ID:}
+    
+    # GDPR Settings
+    gdpr:
+      enabled: true
+      data-retention:
+        personal-data-days: ${PERSONAL_DATA_RETENTION_DAYS:2555}
+        transaction-data-days: ${TRANSACTION_DATA_RETENTION_DAYS:3650}
+        audit-log-days: ${AUDIT_LOG_RETENTION_DAYS:2555}
+      data-subject-rights:
+        enabled: true
+        access-request-response-days: 30
+        deletion-request-response-days: 30
+      consent:
+        required: ${COOKIE_CONSENT_REQUIRED:true}
+        granular: true
+      privacy-policy-url: ${PRIVACY_POLICY_URL:}
+    
+    # Audit Logging
+    audit:
+      enabled: ${AUDIT_LOG_ENABLED:true}
+      log-file: /app/logs/audit.log
+      include-ip-address: true
+      include-user-agent: true
+      include-request-body: false
+      sensitive-fields:
+        - password
+        - creditCard
+        - ssn
+        - taxId
+    
+    # Security Settings
+    security:
+      encryption:
+        enabled: ${ENCRYPTION_ENABLED:true}
+        algorithm: AES-256-GCM
+        key: ${ENCRYPTION_KEY}
+      password-policy:
+        min-length: 12
+        require-uppercase: true
+        require-lowercase: true
+        require-numbers: true
+        require-special-chars: true
+        expiry-days: 90
+      session:
+        max-concurrent: ${MAX_CONCURRENT_SESSIONS:5}
+        timeout-minutes: ${SESSION_TIMEOUT_MINUTES:30}
+      jwt:
+        secret: ${JWT_SECRET}
+        expiration-ms: 3600000
+        refresh-expiration-ms: 86400000
+    
+    # Data Breach Notification
+    breach-notification:
+      enabled: true
+      notification-email: ${DATA_BREACH_NOTIFICATION_EMAIL:}
+      cnpd-notification-hours: 72
+      affected-user-notification-days: 3
+    
+    # Email Configuration
+    email:
+      enabled: true
+      smtp:
+        host: ${SMTP_HOST:localhost}
+        port: ${SMTP_PORT:587}
+        username: ${SMTP_USER:}
+        password: ${SMTP_PASSWORD:}
+        from: ${SMTP_FROM:noreply@example.lu}
+      templates:
+        enabled: true
+        path: classpath:/templates/email/
+    
+    # Backup Configuration
+    backup:
+      enabled: ${BACKUP_ENABLED:true}
+      schedule: ${BACKUP_SCHEDULE:0 2 * * *}
+      retention-days: ${BACKUP_RETENTION_DAYS:90}
+      encryption-enabled: true
+      location: /app/backups
+
+# CORS Configuration
+cors:
+  allowed-origins:
+    - https://your-domain.lu
+    - http://localhost:3000
+  allowed-methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+  allowed-headers:
+    - Authorization
+    - Content-Type
+    - X-Requested-With
+  exposed-headers:
+    - X-Total-Count
+  allow-credentials: true
+  max-age: 3600
+
+# Rate Limiting
+rate-limit:
+  enabled: true
+  global:
+    requests-per-second: 100
+  api:
+    requests-per-second: 50
+  public:
+    requests-per-second: 10

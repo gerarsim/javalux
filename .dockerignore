@@ -1,0 +1,62 @@
+# Docker ignore file for Java + React application
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Environment files (security)
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# Documentation
+README.md
+CHANGELOG.md
+*.md
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Java build
+target/
+*.class
+*.jar
+*.war
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+.nyc_output/
+test-results/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+Dockerfile*
+.terraform
